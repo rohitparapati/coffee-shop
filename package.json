@@ -1,0 +1,10 @@
+{
+  "name": "coffee-shop",
+  "private": true,
+  "version": "1.0.0",
+  "scripts": {
+    "dev": "concurrently -n CLIENT,SERVER -c auto \"npm run dev --prefix client\" \"npm run dev --prefix server\"",
+    "client": "npm run dev --prefix client",
+    "server": "npm run dev --prefix server"
+  }
+}
