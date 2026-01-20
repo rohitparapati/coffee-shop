@@ -1,35 +1,28 @@
-import { useEffect, useState } from "react";
+import { BrowserRouter, Routes, Route } from "react-router-dom";
+import Layout from "./components/layout/Layout";
+
+import Home from "./pages/Home";
+import Offers from "./pages/Offers";
+import Menu from "./pages/Menu";
+import Reserve from "./pages/Reserve";
+import Location from "./pages/Location";
+import Contact from "./pages/Contact";
+import Admin from "./pages/Admin";
 
 export default function App() {
-  const [apiStatus, setApiStatus] = useState("Checking API...");
-
-  useEffect(() => {
-    fetch("http://localhost:5000/api/health")
-      .then((r) => r.json())
-      .then((data) => setApiStatus(data.message))
-      .catch(() => setApiStatus("API not reachable ❌ (is server running?)"));
-  }, []);
-
   return (
-    <div className="container">
-      <h1 style={{ marginBottom: 6 }}>Coffee Shop (Starter)</h1>
-      <p style={{ color: "rgba(245,245,247,0.75)", marginTop: 0 }}>
-        Step 0: Client + Server running locally.
-      </p>
-
-      <div className="card">
-        <h2 style={{ marginTop: 0 }}>API Status</h2>
-        <p style={{ marginBottom: 0 }}>{apiStatus}</p>
-      </div>
-
-      <div style={{ height: 16 }} />
-
-      <div className="card">
-        <h2 style={{ marginTop: 0 }}>Next</h2>
-        <p style={{ color: "rgba(245,245,247,0.75)" }}>
-          In Step 1 we’ll add <b>react-router</b>, navbar, layout, and smooth scroll.
-        </p>
-      </div>
-    </div>
+    <BrowserRouter>
+      <Routes>
+        <Route element={<Layout />}>
+          <Route path="/" element={<Home />} />
+          <Route path="/offers" element={<Offers />} />
+          <Route path="/menu" element={<Menu />} />
+          <Route path="/reserve" element={<Reserve />} />
+          <Route path="/location" element={<Location />} />
+          <Route path="/contact" element={<Contact />} />
+          <Route path="/admin" element={<Admin />} />
+        </Route>
+      </Routes>
+    </BrowserRouter>
   );
 }
