@@ -95,7 +95,7 @@ export default function Contact() {
             </div>
             <div className="infoItem">
               <span className="infoLabel">Phone</span>
-              <p className="infoValue">(314) 555-0189</p>
+              <p className="infoValue">(123) 555-1234</p>
             </div>
             <div className="infoItem">
               <span className="infoLabel">Hours</span>
@@ -127,7 +127,7 @@ export default function Contact() {
 
           {submitted && (
             <div className="card successBox" role="status" aria-live="polite" style={{ marginTop: 12 }}>
-              ✅ Message sent (frontend demo). We’ll connect this to the backend in Step 13.
+              Message sent (frontend demo). We’ll connect this to the backend later.
             </div>
           )}
 
@@ -175,7 +175,7 @@ export default function Contact() {
                 id="phone"
                 name="phone"
                 className="input"
-                placeholder="(314) 555-1234"
+                placeholder="(123) 555-1234"
                 value={values.phone}
                 onChange={onChange}
                 onBlur={onBlur}
