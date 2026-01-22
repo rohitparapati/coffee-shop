@@ -60,7 +60,7 @@ export default function Offers() {
                   <span>
                     Valid: <b>{formatDate(o.validFrom)}</b> → <b>{formatDate(o.validTo)}</b>
                   </span>
-                  <span>Auto-hides when expired ✅</span>
+                  <span>Auto-hides when expired</span>
                 </div>
               </div>
             </article>

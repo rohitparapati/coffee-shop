@@ -40,7 +40,7 @@ export default function Location() {
             </a>
 
             <p className="muted" style={{ marginTop: 10, marginBottom: 0 }}>
-              (Step later: this button will open Google Maps with directions.)
+              (later: this button will open Google Maps with directions.)
             </p>
           </div>
 
@@ -75,7 +75,7 @@ export default function Location() {
         {/* Right column: map placeholder */}
         <section className="card mapPanel" aria-label="Map">
           <div className="mapTop">
-            <h2 className="mapTitle">Map (placeholder)</h2>
+            <h2 className="mapTitle">Map </h2>
             <button
               type="button"
               className="btn"

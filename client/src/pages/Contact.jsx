@@ -117,7 +117,7 @@ export default function Contact() {
 
           <div style={{ height: 10 }} />
           <p style={{ color: "rgba(245,245,247,0.72)", marginBottom: 0 }}>
-            (Step 13 will store messages in the database + show them in Admin.)
+            (will add to store messages to backend)
           </p>
         </aside>
 
