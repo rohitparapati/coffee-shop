@@ -1,0 +1,153 @@
+.locTop {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 14px;
+  flex-wrap: wrap;
+  margin-bottom: 14px;
+}
+
+.locTitle {
+  margin: 0;
+  font-size: 28px;
+  letter-spacing: -0.3px;
+}
+
+.locSub {
+  margin: 6px 0 0;
+  color: rgba(245,245,247,0.72);
+  line-height: 1.6;
+}
+
+.locGrid {
+  display: grid;
+  grid-template-columns: 0.9fr 1.1fr;
+  gap: 14px;
+  align-items: start;
+}
+
+.infoCards {
+  display: grid;
+  gap: 12px;
+}
+
+.infoCard h3 {
+  margin: 0;
+  font-size: 16px;
+}
+
+.muted {
+  color: rgba(245,245,247,0.72);
+  line-height: 1.6;
+}
+
+.kv {
+  display: grid;
+  gap: 10px;
+  margin-top: 10px;
+}
+
+.kvRow {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 10px 12px;
+  border-radius: 14px;
+  border: 1px solid rgba(255,255,255,0.10);
+  background: rgba(255,255,255,0.05);
+}
+
+.kvRow span:first-child {
+  color: rgba(245,245,247,0.72);
+}
+
+.mapPanel {
+  padding: 0;
+  overflow: hidden;
+}
+
+.mapTop {
+  padding: 14px;
+  border-bottom: 1px solid rgba(255,255,255,0.08);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.mapTitle {
+  margin: 0;
+  font-size: 16px;
+}
+
+.mapBox {
+  height: 420px;
+  position: relative;
+  background:
+    radial-gradient(circle at 30% 20%, rgba(202,161,106,0.18), transparent 35%),
+    radial-gradient(circle at 70% 70%, rgba(255,255,255,0.10), transparent 40%),
+    linear-gradient(135deg, rgba(255,255,255,0.06), rgba(255,255,255,0.02));
+}
+
+.mapGrid {
+  position: absolute;
+  inset: 0;
+  background-image:
+    linear-gradient(rgba(255,255,255,0.06) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,0.06) 1px, transparent 1px);
+  background-size: 36px 36px;
+  opacity: 0.6;
+}
+
+.pin {
+  position: absolute;
+  left: 56%;
+  top: 46%;
+  transform: translate(-50%, -100%);
+  width: 18px;
+  height: 18px;
+  border-radius: 999px;
+  background: var(--accent);
+  box-shadow: 0 0 22px rgba(202,161,106,0.6);
+}
+
+.pin::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  width: 42px;
+  height: 42px;
+  border-radius: 999px;
+  border: 2px solid rgba(202,161,106,0.28);
+}
+
+.mapLabel {
+  position: absolute;
+  left: 56%;
+  top: 46%;
+  transform: translate(-50%, 10px);
+  padding: 10px 12px;
+  border-radius: 14px;
+  background: rgba(0,0,0,0.25);
+  border: 1px solid rgba(255,255,255,0.12);
+  backdrop-filter: blur(10px);
+  color: rgba(245,245,247,0.9);
+}
+
+.mapLabel small {
+  display: block;
+  color: rgba(245,245,247,0.72);
+  margin-top: 2px;
+}
+
+@media (max-width: 900px) {
+  .locGrid {
+    grid-template-columns: 1fr;
+  }
+  .mapBox {
+    height: 360px;
+  }
+}
