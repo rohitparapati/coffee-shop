@@ -1,9 +1,7 @@
-import { useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
 import "../styles/offers.css";
-import { offers } from "../data/offers";
 
 function isDateInRange(today, fromStr, toStr) {
-  // Compare by date only (ignore time)
   const t = new Date(today.getFullYear(), today.getMonth(), today.getDate());
   const from = new Date(fromStr + "T00:00:00");
   const to = new Date(toStr + "T23:59:59");
@@ -12,18 +10,52 @@ function isDateInRange(today, fromStr, toStr) {
 
 function formatDate(dStr) {
   const d = new Date(dStr + "T00:00:00");
-  return d.toLocaleDateString(undefined, { year: "numeric", month: "short", day: "numeric" });
+  return d.toLocaleDateString(undefined, {
+    year: "numeric",
+    month: "short",
+    day: "numeric"
+  });
 }
 
 export default function Offers() {
   const today = new Date();
+
+  const [loading, setLoading] = useState(true);
+  const [apiError, setApiError] = useState("");
+  const [offers, setOffers] = useState([]);
+
+  useEffect(() => {
+    let alive = true;
+    setLoading(true);
+    setApiError("");
+
+    fetch("http://localhost:5000/api/offers")
+      .then((r) => {
+        if (!r.ok) throw new Error("Failed to fetch offers");
+        return r.json();
+      })
+      .then((data) => {
+        if (!alive) return;
+        setOffers(data.offers || []);
+        setLoading(false);
+      })
+      .catch(() => {
+        if (!alive) return;
+        setApiError("Could not load offers. Is the server running?");
+        setLoading(false);
+      });
+
+    return () => {
+      alive = false;
+    };
+  }, []);
 
   const activeOffers = useMemo(() => {
     return offers.filter((o) => {
       if (!o.isActive) return false;
       return isDateInRange(today, o.validFrom, o.validTo);
     });
-  }, [today]);
+  }, [offers, today]);
 
   return (
     <div className="container">
@@ -36,7 +68,15 @@ export default function Offers() {
         </div>
       </div>
 
-      {activeOffers.length === 0 ? (
+      {loading ? (
+        <div className="card emptyState" role="status" aria-live="polite">
+          Loading offers...
+        </div>
+      ) : apiError ? (
+        <div className="card emptyState" role="status" aria-live="polite">
+          {apiError}
+        </div>
+      ) : activeOffers.length === 0 ? (
         <div className="card emptyState" role="status" aria-live="polite">
           No active offers right now. Check back later!
         </div>
@@ -58,9 +98,10 @@ export default function Offers() {
 
                 <div className="validityRow">
                   <span>
-                    Valid: <b>{formatDate(o.validFrom)}</b> → <b>{formatDate(o.validTo)}</b>
+                    Valid: <b>{formatDate(o.validFrom)}</b> →{" "}
+                    <b>{formatDate(o.validTo)}</b>
                   </span>
-                  <span>Auto-hides when expired</span>
+                  <span>Powered by DB ✅</span>
                 </div>
               </div>
             </article>
