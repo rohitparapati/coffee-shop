@@ -1,0 +1,396 @@
+.reserveTop {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 14px;
+  flex-wrap: wrap;
+  margin-bottom: 14px;
+}
+
+.reserveTitle {
+  margin: 0;
+  font-size: 28px;
+  letter-spacing: -0.3px;
+}
+
+.reserveSub {
+  margin: 6px 0 0;
+  color: rgba(245,245,247,0.72);
+  line-height: 1.6;
+}
+
+.reserveGrid {
+  display: grid;
+  grid-template-columns: 0.95fr 1.05fr;
+  gap: 14px;
+  align-items: start;
+}
+
+.panelTitle {
+  margin: 0;
+  font-size: 18px;
+}
+
+.helper {
+  margin: 6px 0 0;
+  color: rgba(245,245,247,0.72);
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.field {
+  display: grid;
+  gap: 6px;
+  margin-top: 10px;
+}
+
+.label {
+  font-size: 13px;
+  color: rgba(245,245,247,0.8);
+}
+
+.input {
+  padding: 10px 12px;
+  border-radius: 14px;
+  border: 1px solid rgba(255,255,255,0.14);
+  background: rgba(255,255,255,0.06);
+  color: var(--text);
+}
+
+.row2 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+.errorText {
+  color: rgba(255, 170, 170, 0.95);
+  font-size: 13px;
+  margin: 0;
+}
+
+.successBox {
+  border: 1px solid rgba(120, 220, 170, 0.35);
+  background: rgba(120, 220, 170, 0.10);
+}
+
+/* TIME SLOTS */
+.slotGrid {
+  margin-top: 12px;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 10px;
+}
+
+.slotBtn {
+  padding: 10px 10px;
+  border-radius: 14px;
+  border: 1px solid rgba(255,255,255,0.12);
+  background: rgba(255,255,255,0.06);
+  color: rgba(245,245,247,0.9);
+  cursor: pointer;
+}
+
+.slotBtn:hover { transform: translateY(-1px); }
+
+.slotBtn.active {
+  background: rgba(202, 161, 106, 0.18);
+  border-color: rgba(202, 161, 106, 0.35);
+}
+
+.slotBtn:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+  transform: none;
+}
+
+/* RIGHT PANEL: force proper vertical layout */
+.tableMapSection {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;              /* key: separates header from body */
+  position: relative;
+}
+
+/* HEADER: sits above grid and cannot overlap */
+.tableMapHeader {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+
+  position: relative;
+  z-index: 5;
+
+  padding-bottom: 12px;
+  border-bottom: 1px solid rgba(255,255,255,0.08);
+
+  /* adds a small solid layer so text doesn't blend into cards */
+  background: rgba(12, 12, 16, 0.35);
+  backdrop-filter: blur(8px);
+  border-radius: 18px;
+  padding: 12px;
+}
+
+/* BODY: separate layer below header */
+.tableMapBody {
+  position: relative;
+  z-index: 1;
+}
+
+/* LEGEND */
+.legend {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  color: rgba(245,245,247,0.75);
+  font-size: 13px;
+}
+
+.legendDot {
+  width: 10px;
+  height: 10px;
+  border-radius: 999px;
+  display: inline-block;
+  margin-right: 6px;
+}
+
+.dotAvail { background: rgba(255,255,255,0.7); }
+.dotSel { background: rgba(202,161,106,0.9); }
+.dotUn { background: rgba(70,70,78,0.9); }
+
+/* GROUPS */
+.tableGroupsWrap {
+  display: grid;
+  gap: 18px;
+}
+
+.tableGroup {
+  display: block !important;
+  margin-bottom: 18px;
+}
+
+.groupLabel {
+  /* hard override (fixes global p styles / weird defaults) */
+  position: static !important;
+  display: block !important;
+
+  margin: 0 0 10px 0 !important;
+  padding: 8px 12px;
+
+  font-weight: 900;
+  color: rgba(245,245,247,0.9);
+
+  border-radius: 14px;
+  background: rgba(0,0,0,0.35);
+  border: 1px solid rgba(255,255,255,0.10);
+
+  /* ensures it sits above any transparent layers */
+  z-index: 2;
+}
+
+/* RESPONSIVE GRID */
+.mapGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 12px;
+}
+
+/* TABLE BUTTONS */
+.tableBtn {
+  position: relative;
+  padding: 14px;
+  border-radius: 18px;
+  border: 1px solid rgba(255,255,255,0.12);
+  background: rgba(255,255,255,0.06);
+  color: rgba(245,245,247,0.9);
+  cursor: pointer;
+  text-align: left;
+
+  min-height: 96px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.tableBtn:hover { transform: translateY(-1px); }
+
+.tableBtn.selected {
+  background: rgba(202, 161, 106, 0.18);
+  border-color: rgba(202, 161, 106, 0.35);
+}
+
+.tableBtn.unavailable {
+  background: rgba(30,30,36,0.85);
+  border-color: rgba(255,255,255,0.08);
+  color: rgba(245,245,247,0.45);
+  cursor: not-allowed;
+  transform: none;
+}
+
+.tableId {
+  font-weight: 900;
+  font-size: 15px;
+}
+
+.tableMeta {
+  color: rgba(245,245,247,0.72);
+  font-size: 13px;
+  line-height: 1.4;
+}
+
+.badgeSeats {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  padding: 6px 8px;
+  border-radius: 999px;
+  border: 1px solid rgba(255,255,255,0.14);
+  background: rgba(0,0,0,0.20);
+  font-size: 12px;
+  color: rgba(245,245,247,0.85);
+}
+
+.actionsRow {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  align-items: center;
+  margin-top: 12px;
+}
+
+/* RESPONSIVE */
+@media (max-width: 900px) {
+  .reserveGrid { grid-template-columns: 1fr; }
+  .slotGrid { grid-template-columns: repeat(2, 1fr); }
+}
+/* Each group is a self-contained block -> prevents overlap forever */
+.groupBlock {
+  padding: 12px;
+  border-radius: 18px;
+  border: 1px solid rgba(255,255,255,0.10);
+  background: rgba(0,0,0,0.18);
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.groupHeader {
+  font-weight: 900;
+  color: rgba(245,245,247,0.90);
+  padding: 8px 12px;
+  border-radius: 14px;
+  border: 1px solid rgba(255,255,255,0.10);
+  background: rgba(0,0,0,0.35);
+  line-height: 1.2;
+}
+
+/* Make overall groups spacing cleaner */
+.tableGroupsWrap {
+  display: grid;
+  gap: 16px;
+}
+
+/* Keep grid stable and responsive */
+.mapGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 12px;
+}
+/* --- FORCE FLEX LAYOUT (no grid bugs) --- */
+.mapFlex {
+  display: flex !important;
+  flex-wrap: wrap !important;
+  gap: 12px !important;
+  align-items: stretch;
+}
+
+/* Each table card gets a stable width */
+.mapFlex .tableBtn {
+  flex: 1 1 180px;      /* grow, shrink, base width */
+  max-width: 240px;     /* prevents too-wide cards */
+}
+
+/* Group block container (prevents label overlap forever) */
+.groupBlock {
+  padding: 12px;
+  border-radius: 18px;
+  border: 1px solid rgba(255,255,255,0.10);
+  background: rgba(0,0,0,0.18);
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.groupHeader {
+  font-weight: 900;
+  color: rgba(245,245,247,0.90);
+  padding: 8px 12px;
+  border-radius: 14px;
+  border: 1px solid rgba(255,255,255,0.10);
+  background: rgba(0,0,0,0.35);
+  line-height: 1.2;
+}
+
+/* spacing between groups */
+.tableGroupsWrap {
+  display: grid;
+  gap: 16px;
+}
+.tableMapSection {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.tableMapHeader {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+
+  padding: 12px;
+  border-radius: 18px;
+  border: 1px solid rgba(255,255,255,0.08);
+  background: rgba(12, 12, 16, 0.35);
+  backdrop-filter: blur(8px);
+}
+
+.tableGroupsWrap {
+  display: grid;
+  gap: 16px;
+}
+
+.groupBlock {
+  padding: 12px;
+  border-radius: 18px;
+  border: 1px solid rgba(255,255,255,0.10);
+  background: rgba(0,0,0,0.18);
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.groupHeader {
+  font-weight: 900;
+  color: rgba(245,245,247,0.90);
+  padding: 8px 12px;
+  border-radius: 14px;
+  border: 1px solid rgba(255,255,255,0.10);
+  background: rgba(0,0,0,0.35);
+  line-height: 1.2;
+}
+
+.mapFlex {
+  display: flex !important;
+  flex-wrap: wrap !important;
+  gap: 12px !important;
+  align-items: stretch;
+}
+
+.mapFlex .tableBtn {
+  flex: 1 1 180px;
+  max-width: 260px;
+}
