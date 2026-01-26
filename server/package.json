@@ -2,7 +2,7 @@
   "name": "coffee-shop-server",
   "version": "1.0.0",
   "main": "src/index.js",
-  "type": "commonjs",
+  "type": "module",
   "scripts": {
     "dev": "nodemon src/index.js",
     "start": "node src/index.js",
@@ -13,7 +13,8 @@
     "cors": "^2.8.5",
     "express": "^4.19.2",
     "sqlite": "^5.1.1",
-    "sqlite3": "^5.1.7"
+    "sqlite3": "^5.1.7",
+    "zod": "^4.3.6"
   },
   "devDependencies": {
     "nodemon": "^3.1.0"

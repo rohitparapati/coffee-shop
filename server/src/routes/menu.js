@@ -1,10 +1,11 @@
-const express = require("express");
-const router = express.Router();
-const { getDb } = require("../db");
+import { Router } from "express";
+import db from "../db/db.js";
 
-router.get("/menu", async (req, res) => {
+const router = Router();
+
+// GET /api/menu  (mounted in index.js)
+router.get("/", async (req, res) => {
   try {
-    const db = await getDb();
     const rows = await db.all(
       `SELECT id, name, category, description, price_cents, image_url, is_active
        FROM menu_items
@@ -18,13 +19,14 @@ router.get("/menu", async (req, res) => {
       category: r.category,
       desc: r.description,
       price: (r.price_cents / 100).toFixed(2),
-      image: r.image_url
+      image: r.image_url,
     }));
 
     res.json({ items });
   } catch (err) {
+    console.error(err);
     res.status(500).json({ error: "Failed to load menu." });
   }
 });
 
-module.exports = router;
+export default router;

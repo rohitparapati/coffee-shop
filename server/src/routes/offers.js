@@ -1,10 +1,11 @@
-const express = require("express");
-const router = express.Router();
-const { getDb } = require("../db");
+import { Router } from "express";
+import db from "../db/db.js"; // ✅ uses your existing src/db.js (sqlite open)
 
-router.get("/offers", async (req, res) => {
+const router = Router();
+
+// GET /api/offers  (because index.js mounts: app.use("/api/offers", offersRouter))
+router.get("/", async (req, res) => {
   try {
-    const db = await getDb();
     const rows = await db.all(
       `SELECT id, type, title, description, image_url, valid_from, valid_to, is_active
        FROM offers
@@ -20,13 +21,14 @@ router.get("/offers", async (req, res) => {
       image: o.image_url,
       validFrom: o.valid_from,
       validTo: o.valid_to,
-      isActive: !!o.is_active
+      isActive: !!o.is_active,
     }));
 
     res.json({ offers });
   } catch (err) {
+    console.error(err);
     res.status(500).json({ error: "Failed to load offers." });
   }
 });
 
-module.exports = router;
+export default router;

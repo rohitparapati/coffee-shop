@@ -1,6 +1,8 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import "../styles/reserve.css";
 import { tableGroups } from "../data/tables";
+
+const API = "http://localhost:5001/api";
 
 function isValidEmail(email) {
   return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim());
@@ -22,22 +24,54 @@ export default function Reserve() {
   const [time, setTime] = useState("");
   const [selectedTable, setSelectedTable] = useState("");
 
-  // Demo-only unavailable tables
+  const [availability, setAvailability] = useState([]); // [{tableId, available}]
   const unavailableSet = useMemo(() => {
-    if (!date || !time) return new Set();
+    const s = new Set();
+    availability.forEach((a) => {
+      if (!a.available) s.add(a.tableId);
+    });
+    return s;
+  }, [availability]);
 
-    const key = (date + time).replaceAll("-", "").replaceAll(":", "");
-    const n = Number(key.slice(-3)) || 0;
-
-    const all = tableGroups.flatMap((g) => g.items);
-    const picks = new Set();
-    for (let i = 0; i < 3; i++) picks.add(all[(n + i * 4) % all.length]);
-    return picks;
-  }, [date, time]);
+  const [loadingAvail, setLoadingAvail] = useState(false);
+  const [availError, setAvailError] = useState("");
 
   const [form, setForm] = useState({ name: "", email: "" });
   const [touched, setTouched] = useState({});
-  const [submitted, setSubmitted] = useState(false);
+  const [statusMsg, setStatusMsg] = useState({ type: "", text: "" }); // success/error
+
+  // Fetch availability when date+time selected
+  useEffect(() => {
+    if (!date || !time) {
+      setAvailability([]);
+      setAvailError("");
+      return;
+    }
+
+    let alive = true;
+    setLoadingAvail(true);
+    setAvailError("");
+
+    fetch(`${API}/availability?date=${date}&time=${time}`)
+      .then((r) => {
+        if (!r.ok) throw new Error("availability failed");
+        return r.json();
+      })
+      .then((data) => {
+        if (!alive) return;
+        setAvailability(data.availability || []);
+        setLoadingAvail(false);
+      })
+      .catch(() => {
+        if (!alive) return;
+        setAvailError("Could not load availability. Is the server running?");
+        setLoadingAvail(false);
+      });
+
+    return () => {
+      alive = false;
+    };
+  }, [date, time]);
 
   const errors = useMemo(() => {
     const e = {};
@@ -49,8 +83,13 @@ export default function Reserve() {
     if (!form.email.trim()) e.email = "Email is required.";
     else if (!isValidEmail(form.email)) e.email = "Enter a valid email.";
 
+    // If selected table becomes unavailable (race condition)
+    if (selectedTable && unavailableSet.has(selectedTable)) {
+      e.table = "That table is no longer available. Pick another.";
+    }
+
     return e;
-  }, [date, time, selectedTable, form]);
+  }, [date, time, selectedTable, form, unavailableSet]);
 
   const canSubmit = Object.keys(errors).length === 0;
 
@@ -60,22 +99,69 @@ export default function Reserve() {
       time: true,
       table: true,
       name: true,
-      email: true
+      email: true,
     });
   }
 
-  function onConfirm(e) {
+  async function refreshAvailability() {
+    const a = await fetch(`${API}/availability?date=${date}&time=${time}`).then(
+      (x) => x.json()
+    );
+    setAvailability(a.availability || []);
+  }
+
+  async function onConfirm(e) {
     e.preventDefault();
+    setStatusMsg({ type: "", text: "" });
     markAllTouched();
     if (!canSubmit) return;
 
-    setSubmitted(true);
+    try {
+      const r = await fetch(`${API}/reservations`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          date,
+          time,
+          tableId: selectedTable,
+          name: form.name.trim(),
+          email: form.email.trim(),
+        }),
+      });
 
-    // Demo reset
-    setSelectedTable("");
-    setTime("");
-    setForm({ name: "", email: "" });
-    setTouched({});
+      if (r.status === 409) {
+        setStatusMsg({
+          type: "error",
+          text: "That table was just booked. Pick another.",
+        });
+        await refreshAvailability();
+        setSelectedTable("");
+        return;
+      }
+
+      if (!r.ok) {
+        setStatusMsg({
+          type: "error",
+          text: "Reservation failed. Please try again.",
+        });
+        return;
+      }
+
+      setStatusMsg({ type: "success", text: "✅ Reservation confirmed!" });
+
+      // Refresh availability so the table becomes unavailable immediately
+      await refreshAvailability();
+
+      // Reset form (keep date/time so user sees updated availability)
+      setForm({ name: "", email: "" });
+      setTouched({});
+      setSelectedTable("");
+    } catch {
+      setStatusMsg({
+        type: "error",
+        text: "Server error. Is the backend running?",
+      });
+    }
   }
 
   return (
@@ -90,12 +176,10 @@ export default function Reserve() {
       </div>
 
       <div className="reserveGrid">
-        {/* LEFT PANEL */}
+        {/* LEFT */}
         <section className="card" aria-label="Reservation details">
           <h2 className="panelTitle">1) Choose date & time</h2>
-          <p className="helper">
-            Step 11 will connect real availability + prevent double booking.
-          </p>
+          <p className="helper">Now connected to backend availability ✅</p>
 
           <div className="field">
             <label className="label" htmlFor="date">
@@ -107,10 +191,12 @@ export default function Reserve() {
               type="date"
               value={date}
               onChange={(e) => {
-                setSubmitted(false);
+                setStatusMsg({ type: "", text: "" });
                 setDate(e.target.value);
                 setTime("");
                 setSelectedTable("");
+                setAvailability([]);
+                setAvailError("");
               }}
               onBlur={() => setTouched((t) => ({ ...t, date: true }))}
               aria-invalid={touched.date && !!errors.date}
@@ -135,7 +221,7 @@ export default function Reserve() {
                     type="button"
                     className={time === s ? "slotBtn active" : "slotBtn"}
                     onClick={() => {
-                      setSubmitted(false);
+                      setStatusMsg({ type: "", text: "" });
                       setTime(s);
                       setSelectedTable("");
                       setTouched((t) => ({ ...t, time: true }));
@@ -156,15 +242,24 @@ export default function Reserve() {
 
           <h2 className="panelTitle">3) Your details</h2>
 
-          {submitted && (
+          {statusMsg.text && (
             <div
-              className="card successBox"
+              className={statusMsg.type === "success" ? "card successBox" : "card"}
+              style={{
+                marginTop: 12,
+                border:
+                  statusMsg.type === "error"
+                    ? "1px solid rgba(255,170,170,0.35)"
+                    : undefined,
+                background:
+                  statusMsg.type === "error"
+                    ? "rgba(255,170,170,0.10)"
+                    : undefined,
+              }}
               role="status"
               aria-live="polite"
-              style={{ marginTop: 12 }}
             >
-              ✅ Reservation requested (frontend demo). In Step 11, we’ll save it
-              to the DB.
+              {statusMsg.text}
             </div>
           )}
 
@@ -178,10 +273,9 @@ export default function Reserve() {
                   id="name"
                   className="input"
                   value={form.name}
-                  onChange={(e) => {
-                    setSubmitted(false);
-                    setForm((f) => ({ ...f, name: e.target.value }));
-                  }}
+                  onChange={(e) =>
+                    setForm((f) => ({ ...f, name: e.target.value }))
+                  }
                   onBlur={() => setTouched((t) => ({ ...t, name: true }))}
                   placeholder="Your name"
                   aria-invalid={touched.name && !!errors.name}
@@ -199,10 +293,9 @@ export default function Reserve() {
                   id="email"
                   className="input"
                   value={form.email}
-                  onChange={(e) => {
-                    setSubmitted(false);
-                    setForm((f) => ({ ...f, email: e.target.value }));
-                  }}
+                  onChange={(e) =>
+                    setForm((f) => ({ ...f, email: e.target.value }))
+                  }
                   onBlur={() => setTouched((t) => ({ ...t, email: true }))}
                   placeholder="you@example.com"
                   aria-invalid={touched.email && !!errors.email}
@@ -220,26 +313,8 @@ export default function Reserve() {
             )}
 
             <div className="actionsRow">
-              <button
-                className="btn btnPrimary"
-                type="submit"
-                disabled={!canSubmit}
-              >
+              <button className="btn btnPrimary" type="submit" disabled={!canSubmit}>
                 Confirm Reservation
-              </button>
-              <button
-                className="btn"
-                type="button"
-                onClick={() => {
-                  setDate("");
-                  setTime("");
-                  setSelectedTable("");
-                  setForm({ name: "", email: "" });
-                  setTouched({});
-                  setSubmitted(false);
-                }}
-              >
-                Reset
               </button>
             </div>
 
@@ -250,7 +325,7 @@ export default function Reserve() {
           </form>
         </section>
 
-        {/* RIGHT PANEL */}
+        {/* RIGHT */}
         <section className="card tableMapSection" aria-label="Table map">
           <div className="tableMapHeader">
             <div>
@@ -258,23 +333,13 @@ export default function Reserve() {
                 2) Pick a table
               </h2>
               <p className="helper" style={{ marginTop: 6 }}>
-                Unavailable tables are dark. (Demo for now)
+                {loadingAvail ? "Loading availability..." : "Unavailable tables are dark."}
               </p>
-            </div>
-
-            <div className="legend" aria-label="Legend">
-              <span>
-                <span className="legendDot dotAvail" />
-                Available
-              </span>
-              <span>
-                <span className="legendDot dotSel" />
-                Selected
-              </span>
-              <span>
-                <span className="legendDot dotUn" />
-                Unavailable
-              </span>
+              {availError && (
+                <p className="errorText" style={{ marginTop: 6 }}>
+                  {availError}
+                </p>
+              )}
             </div>
           </div>
 
@@ -307,9 +372,9 @@ export default function Reserve() {
                                 ? "tableBtn selected"
                                 : "tableBtn"
                             }
-                            disabled={unavailable}
+                            disabled={unavailable || loadingAvail}
                             onClick={() => {
-                              setSubmitted(false);
+                              setStatusMsg({ type: "", text: "" });
                               setSelectedTable(id);
                               setTouched((t) => ({ ...t, table: true }));
                             }}
