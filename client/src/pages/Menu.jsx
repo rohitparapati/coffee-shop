@@ -1,7 +1,8 @@
 import { useEffect, useMemo, useState } from "react";
 import "../styles/menu.css";
 
-const API = "http://localhost:5000/api";
+import { USE_MOCK_DATA, API_BASE } from "../config/api";
+import { menuItems as mockMenuItems } from "../data/menuItems";
 
 export default function Menu() {
   const [loading, setLoading] = useState(true);
@@ -16,21 +17,33 @@ export default function Menu() {
     setLoading(true);
     setApiError("");
 
-    fetch(`${API}/menu`)
-      .then((r) => {
+    async function loadMenu() {
+      // 1️⃣ Mock mode ON (recruiter-safe)
+      if (USE_MOCK_DATA) {
+        setItems(mockMenuItems);
+        setLoading(false);
+        return;
+      }
+
+      // 2️⃣ Try backend
+      try {
+        const r = await fetch(`${API_BASE}/menu`);
         if (!r.ok) throw new Error("Failed to fetch menu");
-        return r.json();
-      })
-      .then((data) => {
+        const data = await r.json();
         if (!alive) return;
         setItems(data.items || []);
-        setLoading(false);
-      })
-      .catch(() => {
+      } catch {
+        // 3️⃣ Fallback to mock if backend is down
         if (!alive) return;
-        setApiError("Could not load menu. Is the server running?");
+        setItems(mockMenuItems);
+        setApiError("Showing demo menu (offline mode).");
+      } finally {
+        if (!alive) return;
         setLoading(false);
-      });
+      }
+    }
+
+    loadMenu();
 
     return () => {
       alive = false;
@@ -71,7 +84,8 @@ export default function Menu() {
         <div>
           <h1 className="menuTitle">Menu</h1>
           <p className="menuSub">
-            Search, filter, and pick your favorites. (Powered by DB ✅)
+            Search, filter, and pick your favorites.{" "}
+            {USE_MOCK_DATA ? "(Demo data 🧪)" : "(Live data ✅)"}
           </p>
         </div>
 
@@ -103,12 +117,14 @@ export default function Menu() {
         <div className="card emptyState" role="status" aria-live="polite">
           Loading menu...
         </div>
-      ) : apiError ? (
-        <div className="card emptyState" role="status" aria-live="polite">
-          {apiError}
-        </div>
       ) : (
         <>
+          {apiError && (
+            <div className="card emptyState" role="status" aria-live="polite">
+              {apiError}
+            </div>
+          )}
+
           <div className="tabs" role="tablist" aria-label="Menu categories">
             {categories.map((cat) => (
               <button
@@ -134,13 +150,18 @@ export default function Menu() {
                 <article key={item.id} className="card menuCard">
                   <img
                     className="menuImg"
-                    src={item.image || "https://images.unsplash.com/photo-1459755486867-b55449bb39ff?auto=format&fit=crop&w=900&q=80"}
+                    src={
+                      item.image ||
+                      "https://images.unsplash.com/photo-1459755486867-b55449bb39ff?auto=format&fit=crop&w=900&q=80"
+                    }
                     alt={item.name}
                   />
                   <div className="menuBody">
                     <div className="menuRow">
                       <h3 className="menuName">{item.name}</h3>
-                      <p className="menuPrice">${Number(item.price).toFixed(2)}</p>
+                      <p className="menuPrice">
+                        ${Number(item.price).toFixed(2)}
+                      </p>
                     </div>
                     <p className="menuDesc">{item.desc}</p>
                   </div>

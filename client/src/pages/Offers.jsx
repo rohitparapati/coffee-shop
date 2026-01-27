@@ -1,4 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
+import { USE_MOCK_DATA, API_BASE } from "../config/api";
+import { offers as mockOffers } from "../data/offers";
 import "../styles/offers.css";
 
 function isDateInRange(today, fromStr, toStr) {
@@ -13,7 +15,7 @@ function formatDate(dStr) {
   return d.toLocaleDateString(undefined, {
     year: "numeric",
     month: "short",
-    day: "numeric"
+    day: "numeric",
   });
 }
 
@@ -24,27 +26,39 @@ export default function Offers() {
   const [apiError, setApiError] = useState("");
   const [offers, setOffers] = useState([]);
 
+  // ✅ UPDATED LOGIC
   useEffect(() => {
     let alive = true;
     setLoading(true);
     setApiError("");
 
-    fetch("http://localhost:5000/api/offers")
-      .then((r) => {
-        if (!r.ok) throw new Error("Failed to fetch offers");
-        return r.json();
-      })
-      .then((data) => {
+    async function loadOffers() {
+      // 1️⃣ USE MOCK DATA (recruiter-safe)
+      if (USE_MOCK_DATA) {
+        setOffers(mockOffers);
+        setLoading(false);
+        return;
+      }
+
+      // 2️⃣ TRY BACKEND
+      try {
+        const res = await fetch(`${API_BASE}/offers`);
+        if (!res.ok) throw new Error("API failed");
+        const data = await res.json();
         if (!alive) return;
         setOffers(data.offers || []);
-        setLoading(false);
-      })
-      .catch(() => {
+      } catch {
+        // 3️⃣ FALLBACK TO MOCK DATA
         if (!alive) return;
-        setApiError("Could not load offers. Is the server running?");
+        setOffers(mockOffers);
+        setApiError("Showing demo offers (offline mode).");
+      } finally {
+        if (!alive) return;
         setLoading(false);
-      });
+      }
+    }
 
+    loadOffers();
     return () => {
       alive = false;
     };
@@ -72,10 +86,6 @@ export default function Offers() {
         <div className="card emptyState" role="status" aria-live="polite">
           Loading offers...
         </div>
-      ) : apiError ? (
-        <div className="card emptyState" role="status" aria-live="polite">
-          {apiError}
-        </div>
       ) : activeOffers.length === 0 ? (
         <div className="card emptyState" role="status" aria-live="polite">
           No active offers right now. Check back later!
@@ -85,11 +95,12 @@ export default function Offers() {
           {activeOffers.map((o) => (
             <article key={o.id} className="card offerCard">
               <img className="offerImg" src={o.image} alt={o.title} />
+
               <div className="offerBody">
                 <div className="offerHeader">
                   <h3 className="offerTitle">{o.title}</h3>
-                  <span className="badge" aria-label={`Offer type ${o.type}`}>
-                    <span className="badgeDot" aria-hidden="true" />
+                  <span className="badge">
+                    <span className="badgeDot" />
                     {o.type}
                   </span>
                 </div>
@@ -101,7 +112,9 @@ export default function Offers() {
                     Valid: <b>{formatDate(o.validFrom)}</b> →{" "}
                     <b>{formatDate(o.validTo)}</b>
                   </span>
-                  <span>Powered by DB ✅</span>
+                  <span>
+                    {USE_MOCK_DATA ? "Demo data 🧪" : "Live data ✅"}
+                  </span>
                 </div>
               </div>
             </article>
